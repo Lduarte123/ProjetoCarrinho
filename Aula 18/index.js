@@ -1,4 +1,4 @@
-// Dados dos produtos (você pode adicionar mais ou buscar de uma API)
+// Dados dos produtos
 const produtos = [
     { nome: "Produto 1", preco: "R$50", imagem: "https://via.placeholder.com/250" },
     { nome: "Produto 2", preco: "R$75", imagem: "https://via.placeholder.com/250" },
@@ -6,51 +6,106 @@ const produtos = [
     { nome: "Produto 4", preco: "R$90", imagem: "https://via.placeholder.com/250" }
 ];
 
-// Função para criar os cards
+// Função para criar os cards dos produtos
 function criarCards() {
-    // Pegando o container onde os cards serão inseridos
     const conteiner = document.querySelector('.conteiner');
-
-    // Iterando sobre cada produto
     produtos.forEach(produto => {
-        // Criando o elemento div do card
         const card = document.createElement('div');
         card.classList.add('card');
 
-        // Criando a imagem
         const img = document.createElement('img');
         img.src = produto.imagem;
         img.alt = produto.nome;
 
-        // Criando o label do nome
         const label = document.createElement('label');
         label.setAttribute('name', 'CampoNome');
         label.textContent = produto.nome;
 
-        // Criando o span do preço
         const preco = document.createElement('span');
         preco.textContent = produto.preco;
 
-        // Criando o botão
-        const botao = document.createElement('button');
-        botao.textContent = 'Ver Produtos';
-        botao.onclick = MostrarCarrinho; // Mantendo sua função original
+        // Botão de adicionar ao carrinho
+        const botaoAdicionar = document.createElement('button');
+        botaoAdicionar.textContent = 'Adicionar ao Carrinho';
+        botaoAdicionar.onclick = () => adicionarAoCarrinho(produto);
 
-        // Adicionando os elementos ao card
         card.appendChild(img);
         card.appendChild(label);
         card.appendChild(preco);
-        card.appendChild(botao);
+        card.appendChild(botaoAdicionar);
 
-        // Adicionando o card ao container
         conteiner.appendChild(card);
     });
 }
 
-// Função placeholder para o botão (substitua pelo que você precisa)
-function MostrarCarrinho() {
-    alert('Função do carrinho ainda não implementada!');
+// Função para adicionar produto ao carrinho
+function adicionarAoCarrinho(produto) {
+    let carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    carrinho.push(produto);
+    localStorage.setItem('carrinho', JSON.stringify(carrinho));
 }
 
-// Executando a função quando a página carregar
-window.onload = criarCards;
+// Função para mostrar os itens do carrinho
+function mostrarCarrinho() {
+    const carrinho = JSON.parse(localStorage.getItem('carrinho')) || [];
+    const conteinerCarrinho = document.querySelector('.conteiner');
+    conteinerCarrinho.innerHTML = '';  // Limpar o conteúdo atual
+
+    if (carrinho.length === 0) {
+        conteinerCarrinho.innerHTML = '<h2>Seu carrinho está vazio!</h2>';
+        return;
+    }
+
+    carrinho.forEach(produto => {
+        const itemCarrinho = document.createElement('div');
+        itemCarrinho.classList.add('item-carrinho');
+
+        const nome = document.createElement('h3');
+        nome.textContent = produto.nome;
+
+        const preco = document.createElement('p');
+        preco.textContent = produto.preco;
+
+        itemCarrinho.appendChild(nome);
+        itemCarrinho.appendChild(preco);
+        conteinerCarrinho.appendChild(itemCarrinho);
+    });
+
+    // Botões de "Comprar" e "Limpar"
+    const comprarButton = document.createElement('button');
+    comprarButton.textContent = 'Comprar';
+    comprarButton.onclick = comprar;
+
+    const limparButton = document.createElement('button');
+    limparButton.textContent = 'Limpar Carrinho';
+    limparButton.onclick = limparCarrinho;
+
+    conteinerCarrinho.appendChild(comprarButton);
+    conteinerCarrinho.appendChild(limparButton);
+}
+
+// Função para simular a compra (apenas exibe uma mensagem)
+function comprar() {
+    alert('Compra realizada com sucesso!');
+    localStorage.removeItem('carrinho');
+    mostrarCarrinho();
+}
+
+// Função para limpar o carrinho
+function limparCarrinho() {
+    localStorage.removeItem('carrinho');
+    mostrarCarrinho();
+}
+
+// Função para verificar qual página deve ser exibida
+function verificarPagina() {
+    const caminho = window.location.pathname;
+    if (caminho.includes('carrinho.html')) {
+        mostrarCarrinho();
+    } else {
+        criarCards();
+    }
+}
+
+// Executando a função ao carregar a página
+window.onload = verificarPagina;
